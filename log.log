@@ -1,0 +1,126 @@
+DEBUG|1
+DEBUG|1
+DEBUG|1
+DEBUG|1
+DEBUG|98854926
+DEBUG|98854926
+DEBUG|98854926
+DEBUG|d3747f4b
+DEBUG|b81b1987
+DEBUG|d3747f4b
+DEBUG|0c4af3f3
+DEBUG|bc621fdd
+DEBUG|bc621fdd
+DEBUG|ee235bd7
+DEBUG|413ae47a
+DEBUG|776e21db
+DEBUG|Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Oleksandr', id=605180875, last_name='Belinskyi', type=<ChatType.PRIVATE>, username='farlo0nn'), date=datetime.datetime(2024, 11, 16, 11, 49, 26, tzinfo=datetime.timezone.utc), delete_chat_photo=False, from_user=User(first_name='Oleksandr', id=605180875, is_bot=False, language_code='en', last_name='Belinskyi', username='farlo0nn'), group_chat_created=False, message_id=774, supergroup_chat_created=False, text='Delete Room ❌'), update_id=345332168)<telegram.ext._callbackcontext.CallbackContext object at 0x11197b460>
+DEBUG|Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Oleksandr', id=605180875, last_name='Belinskyi', type=<ChatType.PRIVATE>, username='farlo0nn'), date=datetime.datetime(2024, 11, 16, 11, 53, 18, tzinfo=datetime.timezone.utc), delete_chat_photo=False, from_user=User(first_name='Oleksandr', id=605180875, is_bot=False, language_code='en', last_name='Belinskyi', username='farlo0nn'), group_chat_created=False, message_id=776, supergroup_chat_created=False, text='Delete Room ❌'), update_id=345332170)<telegram.ext._callbackcontext.CallbackContext object at 0x107f7e7b0>
+DEBUG|
+DEBUG|a27b522b
+DEBUG|19
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|e2f924c2
+DEBUG|f1214e43
+DEBUG|f1214e43
+DEBUG|start handler
+DEBUG|start handler
+DEBUG|toka
+DEBUG|Toka
+DEBUG|toka
+DEBUG|toka|Toka
+DEBUG|start handler
+DEBUG|start handler
+DEBUG|<function get_user_wishes at 0x107e2fd80>
+DEBUG|start handler
+DEBUG|start handler
+DEBUG|start handler
+DEBUG|start handler
+DEBUG|start handler
+DEBUG|['...']
+DEBUG|pop
+DEBUG|banan
+DEBUG|...|pop|banan
+DEBUG|start handler
+DEBUG|['...', 'pop', 'banan']
+DEBUG|start handler
+DEBUG|['...']
+DEBUG|pop
+DEBUG|...|pop
+DEBUG|start handler
+DEBUG|['...']
+DEBUG|лл
+DEBUG|limon
+DEBUG|tuka rusk
+DEBUG|...|лл|limon|tuka rusk
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|/cancel
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|[<Room:26cc938d>, <Room:6c5689d5>, <Room:a5253f28>, <Room:a608401c>]
+DEBUG|a608401c
+DEBUG|Enter
+DEBUG|[<Room:26cc938d>, <Room:6c5689d5>, <Room:a5253f28>, <Room:a608401c>]
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|[<Room:6c5689d5>, <Room:a5253f28>, <Room:26cc938d>]
+DEBUG|/cancel
+DEBUG|/cancel
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|/cancel
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Etner
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter
+DEBUG|[<Room:6c5689d5>, <Room:a5253f28>, <Room:26cc938d>]
+DEBUG|26cc938d
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|start handler
+DEBUG|['...', 'лл', 'limon', 'tuka rusk']
+DEBUG|poplavskiy
+DEBUG|/submit
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter
+DEBUG|cancel called
+DEBUG|Enter

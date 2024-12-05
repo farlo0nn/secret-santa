@@ -1,0 +1,33 @@
+{
+    
+    "create_new_room_option": "New Room📝",
+    "enter_the_room_option": "Enter",
+    "my_rooms_option": "My Rooms🚪",
+    "room_info_option": "Room {room_code} ℹ️",
+    
+    "assign_roles_option": "Assign Santas 🎅🏻",
+    "add_wish_option": "Add Wish",
+    "people_list_option": "Info 👤",
+    "delete_room_option": "Delete Room ❌",
+    "return_to_menu_option": "Return⬅️",
+    
+    
+    
+    "start_message": "<b>Welcome To Secret Santa Bot!</b> 🎅🎄",
+    "my_rooms_message": "Choose one of your rooms",
+    "invalid_message": "Invalid message, please use navigation panel instead",
+    "new_room_message": "New Room Was Created",
+    
+    "return_to_menu_message": "You're back to Main Menu",
+    "people_list_message": "🏠 Room {room_code}🏠\n\n<b>🦧 {admin_username}</b>\n\n🐒 <b>Members</b>\n\n{usernames_string}",
+    "delete_room_message": "<b>You've successfully deleted room {}</b>",
+    "invalid_room_context_message": "Room is not select\nPlease select it",
+    "give_to_message": "You need to prepare a gift for {receiver_username}\nWe wish you fun on your holiday!",
+    "no_created_rooms_message": "There are no rooms created",
+    "room_doesnt_exist_message": "Room {room_code} doesn't exist",
+    "room_selected_message": "You selected Room {room_code}",
+    "add_to_room_message": "You was successfully added to {username}'s room with code {code}",
+    "roles_already_assigned": "Roles are already assigned"
+    
+
+}
