@@ -72,12 +72,12 @@ async def my_rooms(user_id, context: ContextTypes.DEFAULT_TYPE):
 async def room_choice(user_id, context: ContextTypes.DEFAULT_TYPE):
 
     room_code = context.user_data["room_code"]
-
+    
     if room_code:
         if db.room_exists(room_code):
             pass
         else:
-            return await _send_message(static.room_doesnt_exist, user_id, context)
+            return await _send_message(static.room_doesnt_exist_message.format(room_code), user_id, context)
     user_is_admin = db.user_is_admin(user_id, room_code)
 
     return await _send_message(

@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, CallbackQuery
 from telegram.ext import ContextTypes
 from telegram.ext import CallbackContext
 from loguru import logger
@@ -37,14 +37,13 @@ async def my_rooms_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await my_rooms(update.effective_chat.id, context)
 
 
-async def room_choice_callback(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
-    await update.callback_query.answer()
-
-    room_code = update.callback_query.data
+async def room_choice_callback( update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query: CallbackQuery = update.callback_query  
+    await query.answer()
+    logger.debug(update.callback_query.id)
+    room_code = query.data.split("_")[1]
     context.user_data["room_code"] = room_code
-
+    await query.delete_message()
     await room_choice(update.effective_chat.id, context)
 
 

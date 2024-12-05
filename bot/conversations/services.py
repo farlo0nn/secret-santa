@@ -4,7 +4,7 @@ from static_data import messages as static
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram import Update, ReplyKeyboardRemove
-from ..keyboards import room_menu_keyboard, main_menu_keyboard
+from ..keyboards import room_menu_keyboard, main_menu_keyboard, submit_wishes_key, cancel_entering_the_room_key
 from ..validators import room_context_validator
 from loguru import logger
 
@@ -25,10 +25,12 @@ async def add_wish_start_conversation(
         logger.debug(context.user_data["wish_list"])
         wish_list_2_str = ", ".join(context.user_data["wish_list"])
     else:
+        context.user_data["wish_list"] = []
         wish_list_2_str = "..."
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"Write any wish you have\nYour current wishes:\n{wish_list_2_str}\nSend /submit to stop adding wishes.\n\n",
+        text=f"Write any wish you have\nYour current wishes:\n{wish_list_2_str}",
+        reply_markup=submit_wishes_key()
     )
     return ADD_WISH
 
@@ -38,31 +40,30 @@ async def add_wish(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Stores the photo and asks for a location."""
     user = update.message.from_user
     wish = update.message.text
-    logger.debug(wish)
     wish_list = context.user_data["wish_list"]
+    
     if wish not in wish_list:
         wish_list.append(wish)
         await update.message.reply_text(
-            "Wish was added\n\nAre there any wishes?\nSend /submit to stop adding wishes."
+            "Wish was added\n\nAre there any wishes?",
+            reply_markup=submit_wishes_key()
         )
     else:
         await update.message.reply_text(
-            "This wish is already in your list\n\nAre there any wishes?\nSend /submit to stop adding wishes."
+            "This wish is already in your list\n\nAre there any wishes?",
+            reply_markup=submit_wishes_key()
         )
 
     return ADD_WISH
 
 
 @room_context_validator
-async def submit_wishes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def submit_wishes(update: int, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancels and ends the conversation."""
-    user_id = update.message.from_user.id
-    await update.message.reply_text(
-        "Thanks for adding your wishes",
-        reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id)),
-    )
-    wish_list = context.user_data["wish_list"]
+    user_id = update
     room_code = context.user_data["room_code"]
+    wish_list = context.user_data["wish_list"]
+    
     logger.debug("|".join(wish_list))
     db.add_wish_list(user_id, room_code, wish_list)
     return ConversationHandler.END
@@ -75,15 +76,14 @@ async def enter_the_room_start_conversation(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Starts the conversation and asks the user about their gender."""
-
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"Type room code\nSend /cancel to get back to main menu\n\n",
-        reply_markup=ReplyKeyboardRemove(),
+        text=f"Type room code",
+        reply_markup=cancel_entering_the_room_key()
     )
 
+    
     return ENTER_THE_ROOM
-
 
 async def enter_the_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.effective_chat.id
@@ -95,17 +95,19 @@ async def enter_the_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text="You are successfully added to the room",
-                reply_markup=room_menu_keyboard(),
+                reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id,room_code)),
             )
             return ConversationHandler.END
         else:
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text="You are already in this room\nSend /cancel to get back to main menu",
+                text="You are already in this room",
+                reply_markup=cancel_entering_the_room_key()
             )
     else:
         await update.message.reply_text(
-            "Room code is not valid\nSend /cancel to get back to main menu"
+            "Room code is not valid",
+            reply_markup=cancel_entering_the_room_key()
         )
         return ENTER_THE_ROOM
 
@@ -128,7 +130,7 @@ async def cancel_entering_the_room(
     """Cancels and ends the conversation."""
     logger.debug("cancel called")
     await context.bot.send_message(
-        chat_id=update.effective_chat.id,
+        chat_id=update,
         text="Back to menu",
         reply_markup=main_menu_keyboard(),
     )

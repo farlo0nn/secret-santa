@@ -1,7 +1,6 @@
 from telegram.ext import filters
 
-
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, CallbackQueryHandler
 from telegram.ext import MessageHandler
 from telegram.ext import ConversationHandler
 
@@ -19,6 +18,11 @@ from .services import (
     cancel_entering_the_room,
 )
 
+from .callbacks import (
+    submit_wishes_callback,
+    cancel_entering_the_room_callback
+)
+
 
 def get_add_wishes_conversation_handler():
 
@@ -26,11 +30,11 @@ def get_add_wishes_conversation_handler():
         entry_points=[MessageHandler(AddWishFilter(), add_wish_start_conversation)],
         states={
             ADD_WISH: [
-                CommandHandler("submit", submit_wishes),
+                # CallbackQueryHandler(submit_wishes_callback, pattern='^submit'),
                 MessageHandler(filters.TEXT, add_wish),
             ],
         },
-        fallbacks=[CommandHandler("submit", submit_wishes)],
+        fallbacks=[CallbackQueryHandler(submit_wishes_callback, pattern='^submit')]
     )
     return conv_handler
 
@@ -43,10 +47,9 @@ def get_enter_the_room_conversation_handler():
         ],
         states={
             ENTER_THE_ROOM: [
-                CommandHandler("cancel", cancel_entering_the_room),
                 MessageHandler(filters.TEXT, enter_the_room),
             ],
         },
-        fallbacks=[CommandHandler("cancel", cancel_entering_the_room)],
+        fallbacks=[CallbackQueryHandler(cancel_entering_the_room_callback, pattern='^cancel')],
     )
     return conv_handler

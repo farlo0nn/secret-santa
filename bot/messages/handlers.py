@@ -28,11 +28,6 @@ from .callbacks import (
 def get_start_handler():
     return CommandHandler(command="start", callback=start_callback)
 
-
-# def get_invalid_messages_handler():
-# return MessageHandler(InvalidMessageFilter(), callback=invalid_message_callback)
-
-
 def get_create_room_handler():
     return MessageHandler(CreateRoomFilter(), callback=create_room_callback)
 
@@ -41,15 +36,8 @@ def get_my_rooms_handler():
     return MessageHandler(MyRoomsFilter(), callback=my_rooms_callback)
 
 
-# def get_add_to_room_handler():
-#     return MessageHandler(ValidRoomCodeFilter(), callback=add_to_room_callback)
-
-# def get_info_room_handler():
-#     return MessageHandler(InfoRoomFilter(), callback=info_room_callback)
-
-
 def get_room_choice_handler():
-    return CallbackQueryHandler(room_choice_callback)
+    return CallbackQueryHandler(room_choice_callback, pattern='^rc_')
 
 
 def get_assign_roles_handler():
