@@ -10,13 +10,7 @@ async def submit_wishes_callback(
     
     query: CallbackQuery = update.callback_query 
 
-    await query.answer()
-    logger.debug(query.data)
-    if query.data == "submit":
-        wish_list = context.user_data["wish_list"]
-        await query.edit_message_text(f"Your wishes in this room:\n{", ".join(wish_list)}")
-        
-        return await submit_wishes(update.effective_chat.id, context) 
+    return await submit_wishes(update,context,query)
 
 
 async def cancel_entering_the_room_callback(

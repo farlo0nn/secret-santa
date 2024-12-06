@@ -16,20 +16,30 @@ async def add_wish_start_conversation(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     """Starts the conversation and asks the user about their gender."""
-    logger.debug("start handler")
+    
     wish_list = db.get_user_wishes(
         update.message.from_user.id, context.user_data["room_code"]
     )
     if wish_list is not None:
         context.user_data["wish_list"] = wish_list
+        context.user_data["wish_list_to_add"] = []
         logger.debug(context.user_data["wish_list"])
         wish_list_2_str = ", ".join(context.user_data["wish_list"])
     else:
         context.user_data["wish_list"] = []
+        context.user_data["wish_list_to_add"] = []
         wish_list_2_str = "..."
+
+    # logger.debug("|".join(context.user_data["wish_list"]))
+
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"Write any wish you have\nYour current wishes:\n{wish_list_2_str}",
+        text="Write any wish you have",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=f"Your current wishes:\n{wish_list_2_str}",
         reply_markup=submit_wishes_key()
     )
     return ADD_WISH
@@ -41,9 +51,9 @@ async def add_wish(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     wish = update.message.text
     wish_list = context.user_data["wish_list"]
-    
-    if wish not in wish_list:
-        wish_list.append(wish)
+    wish_list_to_add = context.user_data["wish_list_to_add"]
+    if wish not in wish_list and wish not in wish_list_to_add:
+        wish_list_to_add.append(wish)
         await update.message.reply_text(
             "Wish was added\n\nAre there any wishes?",
             reply_markup=submit_wishes_key()
@@ -58,15 +68,24 @@ async def add_wish(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 @room_context_validator
-async def submit_wishes(update: int, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def submit_wishes(update: Update, context: ContextTypes.DEFAULT_TYPE, query) -> int:
     """Cancels and ends the conversation."""
-    user_id = update
-    room_code = context.user_data["room_code"]
-    wish_list = context.user_data["wish_list"]
-    
-    logger.debug("|".join(wish_list))
-    db.add_wish_list(user_id, room_code, wish_list)
-    return ConversationHandler.END
+    await query.answer()
+    if query.data == "submit":
+        
+        wish_list_to_add = context.user_data["wish_list_to_add"]
+        wish_list = context.user_data["wish_list"] + wish_list_to_add
+        room_code = context.user_data["room_code"]
+        user_id = update.effective_chat.id
+        await query.delete_message()
+        await context.bot.send_message(chat_id=user_id, text=f"Your wishes in this room:\n{", ".join(wish_list)}", reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id,room_code)))        
+        
+        # logger.debug("|".join(wish_list))
+        db.add_wish_list(user_id, room_code, wish_list_to_add)
+
+        context.user_data["wish_list"] = []
+        context.user_data["wish_list_to_add"] = []
+        return ConversationHandler.END
 
 
 # ---------------------
