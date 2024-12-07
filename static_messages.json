@@ -19,7 +19,7 @@
     "new_room_message": "New Room Was Created",
     
     "return_to_menu_message": "You're back to Main Menu",
-    "people_list_message": "🏠 Room {room_code}🏠\n\n<b>🦧 {admin_username}</b>\n\n🐒 <b>Members</b>\n\n{usernames_string}",
+    "people_list_message": "🏠 Room {room_code}🏠\n\n<b>🦧 {admin_username}</b>\n\n🐒 <b>Members</b>\n\n➖{usernames_string}",
     "delete_room_message": "<b>You've successfully deleted room {}</b>",
     "invalid_room_context_message": "Room is not select\nPlease select it",
     "give_to_message": "You need to prepare a gift for {receiver_username}\nWe wish you fun on your holiday!",

@@ -5,7 +5,7 @@ from telegram.ext import MessageHandler
 from telegram.ext import ConversationHandler
 
 
-from ..filters import AddWishFilter, EnterTheRoomFilter
+from .filters import AddWishFilter, EnterTheRoomFilter
 
 from .services import (
     ADD_WISH,

@@ -29,9 +29,6 @@ async def create_room_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     await create_room(update.effective_chat.id, context)
 
 
-# async def add_to_room_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     await add_to_room(update.effective_chat.id, update.message.text)
-
 
 async def my_rooms_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await my_rooms(update.effective_chat.id, context)
@@ -40,7 +37,6 @@ async def my_rooms_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def room_choice_callback( update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query: CallbackQuery = update.callback_query  
     await query.answer()
-    logger.debug(update.callback_query.id)
     room_code = query.data.split("_")[1]
     context.user_data["room_code"] = room_code
     await query.delete_message()

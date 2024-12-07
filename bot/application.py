@@ -42,7 +42,7 @@ def config_application(application: Application) -> None:
 def run_application() -> None:
     if isinstance(config.TG_TOKEN, str):
 
-        application = ApplicationBuilder().token(config.TG_TOKEN).build()
+        application = ApplicationBuilder().token(config.TG_TOKEN).read_timeout(30).write_timeout(30).build()
         config_application(application)
 
         application.run_polling()

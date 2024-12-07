@@ -17,13 +17,12 @@ async def add_wish_start_conversation(
 ) -> int:
     """Starts the conversation and asks the user about their gender."""
     
-    wish_list = db.get_user_wishes(
+    wish_list = db.get_user_wish_list(
         update.message.from_user.id, context.user_data["room_code"]
     )
     if wish_list is not None:
         context.user_data["wish_list"] = wish_list
         context.user_data["wish_list_to_add"] = []
-        logger.debug(context.user_data["wish_list"])
         wish_list_2_str = ", ".join(context.user_data["wish_list"])
     else:
         context.user_data["wish_list"] = []

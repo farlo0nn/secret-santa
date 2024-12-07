@@ -2,7 +2,7 @@ from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, CallbackQueryHandler
 
 
-from ..filters import (
+from .filters import (
     CreateRoomFilter,
     MyRoomsFilter,
     AssignRolesFilter,

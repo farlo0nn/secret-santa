@@ -3,7 +3,7 @@ import random
 
 from .session import db_session
 from .models import User, Room, GiftAssignment, Wish
-from utils.models import DataTransfer, GiverReceiverPair
+from utils.models import DataTransfer, GiverReceiverIdsPair, GiverReceiverPair
 from loguru import logger
 
 
@@ -97,7 +97,7 @@ def assign_roles(room_code):
         # user = db.query(User).filter_by(pk=assignment.giver_pk).first()
         assignments = db.query(GiftAssignment).filter_by(room_pk=room.pk).all()
         giver_receiver_pairs = [
-            GiverReceiverPair(assignment.giver.id, assignment.receiver.id)
+            GiverReceiverIdsPair(assignment.giver.id, assignment.receiver.id)
             for assignment in assignments
         ]
         return DataTransfer(giver_receiver_pairs, True)
@@ -133,7 +133,7 @@ def add_wish_list(user_id, room_code, wish_list):
         db.add_all(wish_object_list)
 
 
-def get_user_wishes(user_id, room_code):
+def get_user_wish_list(user_id, room_code):
     with db_session() as db:
         user: User = db.query(User).filter_by(id=user_id).first()
         room: Room = db.query(Room).filter_by(code=room_code).first()
@@ -161,3 +161,16 @@ def user_is_admin(user_id, room_code):
     with db_session() as db:
         user: User = db.query(User).filter_by(id=user_id).first()
         return room_code in [room.code for room in user.created_rooms]
+
+
+def get_gift_assignment(user_id, room_code):
+    with db_session() as db:
+        room = db.query(Room).filter_by(code=room_code).first()
+        user =  db.query(User).filter_by(id=user_id).first()
+        assignment = db.query(GiftAssignment).filter_by(room_pk=room.pk).filter_by(giver_pk=user.pk).first()
+        if assignment is not None: 
+            return DataTransfer(GiverReceiverPair(assignment.giver.username, assignment.giver.id, assignment.receiver.username, assignment.receiver.id),True)
+        else: 
+            return DataTransfer(None, valid=False)
+        
+    

@@ -29,15 +29,9 @@ async def send_invalid_room_context_message(
 
 
 async def send_roles(
-    giver_chat_id, receiver_chat_id, context: ContextTypes.DEFAULT_TYPE
+    giver_chat_id, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    receiver_username = db.get_user_username(receiver_chat_id)
-    if receiver_username is not None:
-        await _send_message(
-            static.give_to_message.format(receiver_username=receiver_username),
-            giver_chat_id,
-            context,
-        )
+    await people_list(giver_chat_id, context)
 
 
 async def send_invalid_message(user_id, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -95,7 +89,6 @@ async def assign_roles(user_id, context: ContextTypes.DEFAULT_TYPE):
         for giver_receiver_pair in response.data:
             await send_roles(
                 giver_chat_id=giver_receiver_pair.giver_chat_id,
-                receiver_chat_id=giver_receiver_pair.receiver_chat_id,
                 context=context,
             )
     else:
@@ -103,18 +96,34 @@ async def assign_roles(user_id, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def people_list(user_id, context: ContextTypes.DEFAULT_TYPE):
-    room_code = context.user_data["room_code"]
-    usernames = db.get_room_people_list(room_code)
-    admin_username = db.get_room_admin(room_code)
+
     await _send_message(
-        static.people_list_message.format(
-            room_code=room_code,
-            admin_username=admin_username,
-            usernames_string="\n".join(usernames),
-        ),
+        get_room_info(user_id, context)
+        ,
         user_id,
         context,
     )
+
+def get_room_info(user_id, context):
+
+    room_code = context.user_data["room_code"]
+    usernames = db.get_room_people_list(room_code)
+    admin_username = db.get_room_admin(room_code)
+    gift_assignment = db.get_gift_assignment(user_id, room_code)
+    info_message = static.people_list_message.format(
+            room_code=room_code,
+            admin_username=admin_username,
+            usernames_string="\n".join(usernames),
+        )
+    if gift_assignment.valid:
+        info_message += f"\n\nYou prepare gift for <b>{gift_assignment.data.receiver_username}</b>"
+        wish_list = db.get_user_wish_list(gift_assignment.data.giver_id, room_code)  
+        if wish_list != None:
+            info_message += f"\n\nWishes:\n{", ".join(wish_list)}"
+    else:
+        info_message += f"\n\nRoles are not assigned yet"
+    return info_message
+    
 
 
 async def delete_room(user_id, context: ContextTypes.DEFAULT_TYPE):
