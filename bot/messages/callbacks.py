@@ -22,6 +22,9 @@ async def invalid_message_callback(update: Update, context: ContextTypes.DEFAULT
 
 
 async def start_callback(update: Update, context: CallbackContext):
+    username = update.effective_chat.username 
+    if username is None:
+        username = update.effective_chat.first_name + " " + update.effective_chat.last_name
     await start(update.effective_chat.id, update.effective_chat.username, context)
 
 

@@ -18,7 +18,7 @@ def create_user(user_id, username):
 def create_room(admin_id):
     with db_session() as db:
         user = db.query(User).filter_by(id=admin_id).first()
-        room = Room(code=generate_room_code(), admin_id=user.pk)
+        room = Room(code=generate_room_code(), admin_id=admin_id)
         room.users.append(user)
         db.add(room)
 
@@ -38,9 +38,9 @@ def add_to_room(user_id, code):
         return user.username
 
 
-def get_my_room_codes(id):
+def get_my_room_codes(user_id):
     with db_session() as db:
-        user = db.query(User).filter_by(id=id).first()
+        user = db.query(User).filter_by(id=user_id).first()
         return [room.code for room in user.rooms]
 
 
@@ -73,7 +73,7 @@ def assign_roles(room_code):
         room = db.query(Room).filter_by(code=room_code).first()
 
         assignment_for_room_exists = bool(
-            db.query(GiftAssignment).filter_by(room_pk=room.pk).count()
+            db.query(GiftAssignment).filter_by(room_code=room.code).count()
         )
         if assignment_for_room_exists:
             return DataTransfer(valid=False)
@@ -89,13 +89,13 @@ def assign_roles(room_code):
 
         for giver, receiver in zip(givers, receivers):
             assignment = GiftAssignment(
-                giver_pk=giver.pk, receiver_pk=receiver.pk, room_pk=room.pk
+                giver_id=giver.id, receiver_id=receiver.id, room_code=room.code
             )
             assignments.append(assignment)
 
         db.add_all(assignments)
         # user = db.query(User).filter_by(pk=assignment.giver_pk).first()
-        assignments = db.query(GiftAssignment).filter_by(room_pk=room.pk).all()
+        assignments = db.query(GiftAssignment).filter_by(room_code=room.code).all()
         giver_receiver_pairs = [
             GiverReceiverIdsPair(assignment.giver.id, assignment.receiver.id)
             for assignment in assignments
@@ -125,10 +125,8 @@ def room_exists(room_code):
 
 def add_wish_list(user_id, room_code, wish_list):
     with db_session() as db:
-        user = db.query(User).filter_by(id=user_id).first()
-        room = db.query(Room).filter_by(code=room_code).first()
         wish_object_list = [
-            Wish(content=wish, user_pk=user.pk, room_pk=room.pk) for wish in wish_list
+            Wish(content=wish, user_id=user_id, room_code=room_code) for wish in wish_list
         ]
         db.add_all(wish_object_list)
 
@@ -136,11 +134,9 @@ def add_wish_list(user_id, room_code, wish_list):
 def get_user_wish_list(user_id, room_code):
     with db_session() as db:
         user: User = db.query(User).filter_by(id=user_id).first()
-        room: Room = db.query(Room).filter_by(code=room_code).first()
-        wish: Wish = 0
         wish_list = [
             wish.content
-            for wish in list(filter(lambda wish: wish.room_pk == room.pk, user.wishes))
+            for wish in list(filter(lambda wish: wish.room_code == room_code, user.wishes))
         ]
         return wish_list or None
 
@@ -165,9 +161,7 @@ def user_is_admin(user_id, room_code):
 
 def get_gift_assignment(user_id, room_code):
     with db_session() as db:
-        room = db.query(Room).filter_by(code=room_code).first()
-        user =  db.query(User).filter_by(id=user_id).first()
-        assignment = db.query(GiftAssignment).filter_by(room_pk=room.pk).filter_by(giver_pk=user.pk).first()
+        assignment = db.query(GiftAssignment).filter_by(room_code=room_code).filter_by(giver_id=user_id).first()
         if assignment is not None: 
             return DataTransfer(GiverReceiverPair(assignment.giver.username, assignment.giver.id, assignment.receiver.username, assignment.receiver.id),True)
         else: 
