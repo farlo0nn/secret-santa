@@ -18,7 +18,8 @@ class User(Base):
 
     pk: Mapped[int] = mapped_column(primary_key=True)
     id: Mapped[int] = mapped_column(unique=True)
-    username: Mapped[str] = mapped_column(unique=True)
+    
+    username = Column(String(255), unique=False)
 
     created_rooms = relationship("Room", backref="admin")
     rooms = relationship("Room", secondary=user_room, back_populates="users")
@@ -44,7 +45,7 @@ class Room(Base):
     __tablename__ = "Room"
 
     pk: Mapped[int] = mapped_column(primary_key=True)
-    code: Mapped[str] = mapped_column(unique=True)
+    code = Column(String(8), unique=True)
     admin_id = Column(Integer, ForeignKey("User.id"))
     users = relationship("User", secondary=user_room, back_populates="rooms")
     assignments = relationship("GiftAssignment", backref="room", cascade="all,delete")
@@ -74,7 +75,7 @@ class Wish(Base):
     __tablename__ = "Wish"
 
     pk: Mapped[int] = mapped_column(primary_key=True)
-    content: Mapped[str] = mapped_column(unique=False)
+    content = Column(String(255), unique=False)
     user_id = Column(Integer, ForeignKey("User.id"))
     room_code = Column(String(8), ForeignKey("Room.code"))
 

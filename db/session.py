@@ -10,7 +10,7 @@ def get_engine() -> Engine:
         url = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}\
         @{DB_HOST}/{DB_NAME}"
     elif DB_MANAGER == "mysql":
-        url = f"mysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_PORT}"
+        url = f"mysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
     engine = create_engine(
         url        
     )
