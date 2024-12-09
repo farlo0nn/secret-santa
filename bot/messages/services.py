@@ -120,7 +120,7 @@ def get_room_info(user_id, context):
         )
     if gift_assignment.valid:
         info_message += static.assignment_message.format(receiver=gift_assignment.data.receiver_username)
-        wish_list = db.get_user_wish_list(gift_assignment.data.giver_id, room_code)  
+        wish_list = db.get_user_wish_list(gift_assignment.data.receiver_id, room_code)  
         if wish_list != None:
             logger.debug(wish_list)
             info_message += static.users_wishes_message.format(wish_list=", ".join(wish_list))
