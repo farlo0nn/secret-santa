@@ -1,6 +1,6 @@
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, CallbackQueryHandler
-
+from telegram.ext import filters
 
 from .filters import (
     CreateRoomFilter,
@@ -23,7 +23,8 @@ from .callbacks import (
     people_list_callback,
     delete_room_callback,
     return_to_menu_callback,
-    leave_room_callback
+    leave_room_callback,
+    username_enter_callback
 )
 
 
@@ -59,3 +60,6 @@ def get_return_to_menu_handler():
 
 def get_leave_room_handler():
     return MessageHandler(LeaveRoomFilter(), callback=leave_room_callback)
+
+def get_username_enter_callback():
+    return MessageHandler(filters.TEXT & ~filters.COMMAND, callback=username_enter_callback)

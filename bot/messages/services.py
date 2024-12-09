@@ -38,12 +38,21 @@ async def send_invalid_message(user_id, context: ContextTypes.DEFAULT_TYPE) -> N
     await _send_message(static.invalid_message, user_id, context)
 
 
-async def start(admin_id, username, context: ContextTypes.DEFAULT_TYPE):
-    db.create_user(admin_id, username)
+async def start(user_id, username, context: ContextTypes.DEFAULT_TYPE):
+    
     await _send_message(
-        static.start_message, admin_id, context, reply_markup=main_menu_keyboard()
+        static.start_message.format(username=username), user_id, context
     )
 
+
+async def create_user(user_id, username, context: ContextTypes.DEFAULT_TYPE):
+    db.create_user(user_id, username)
+    await _send_message(
+        "Вы завершили регистрацию\nЮзернейм - {username}".format(username=username),
+        user_id,
+        context,
+        reply_markup=main_menu_keyboard()
+    )
 
 async def create_room(user_id, context: ContextTypes.DEFAULT_TYPE) -> None:
     db.create_room(admin_id=user_id)

@@ -13,7 +13,8 @@ from .services import (
     delete_room,
     people_list,
     return_to_menu,
-    leave_room
+    leave_room,
+    create_user
 )
 from ..validators import room_context_validator
 
@@ -24,13 +25,28 @@ async def invalid_message_callback(update: Update, context: ContextTypes.DEFAULT
 
 async def start_callback(update: Update, context: CallbackContext):
     
-    username = update.effective_chat.username 
-    if username is None:
-        if update.effective_chat.first_name is not None:
-            username = update.effective_chat.first_name + " " + update.effective_chat.last_name
-        else:
-            username = update.effective_chat.effective_name
+    context.user_data["username_enter_expected"] = True 
+
     await start(update.effective_chat.id, update.effective_chat.username, context)
+
+
+async def username_enter_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if context.user_data["username_enter_expected"]:
+
+        username = update.effective_chat.username 
+        if username is None:
+            if update.effective_chat.first_name is not None:
+                username = update.effective_chat.first_name + " " + update.effective_chat.last_name
+            else:
+                username = update.effective_chat.effective_name
+
+        if update.message.text != "-":
+            username = update.message.text
+            
+        await create_user(update.effective_chat.id, username, context)
+            
+            
 
 
 async def create_room_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
