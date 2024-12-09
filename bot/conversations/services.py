@@ -33,12 +33,12 @@ async def add_wish_start_conversation(
 
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Write any wish you have",
+        text=static.type_wishes_message,
         reply_markup=ReplyKeyboardRemove()
     )
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"Your current wishes:\n{wish_list_2_str}",
+        text=static.users_wishes_message.format(wish_list=wish_list_2_str),
         reply_markup=submit_wishes_key()
     )
     return ADD_WISH
@@ -46,7 +46,7 @@ async def add_wish_start_conversation(
 
 @room_context_validator
 async def add_wish(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Stores the photo and asks for a location."""
+
     user = update.message.from_user
     wish = update.message.text
     wish_list = context.user_data["wish_list"]
@@ -54,12 +54,12 @@ async def add_wish(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if wish not in wish_list and wish not in wish_list_to_add:
         wish_list_to_add.append(wish)
         await update.message.reply_text(
-            "Wish was added\n\nAre there any wishes?",
+            static.wish_added_message,
             reply_markup=submit_wishes_key()
         )
     else:
         await update.message.reply_text(
-            "This wish is already in your list\n\nAre there any wishes?",
+            static.wish_already_in_list_message,
             reply_markup=submit_wishes_key()
         )
 
@@ -68,7 +68,7 @@ async def add_wish(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 @room_context_validator
 async def submit_wishes(update: Update, context: ContextTypes.DEFAULT_TYPE, query) -> int:
-    """Cancels and ends the conversation."""
+
     await query.answer()
     if query.data == "submit":
         
@@ -77,7 +77,7 @@ async def submit_wishes(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         room_code = context.user_data["room_code"]
         user_id = update.effective_chat.id
         await query.delete_message()
-        await context.bot.send_message(chat_id=user_id, text=f"Your wishes in this room:\n{", ".join(wish_list)}", reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id,room_code)))        
+        await context.bot.send_message(chat_id=user_id, text=static.users_wishes_message.format(wish_list=", ".join(wish_list)), reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id,room_code),roles_assigned=db.roles_assigned(room_code)))        
         
         # logger.debug("|".join(wish_list))
         db.add_wish_list(user_id, room_code, wish_list_to_add)
@@ -93,10 +93,10 @@ async def submit_wishes(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
 async def enter_the_room_start_conversation(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Starts the conversation and asks the user about their gender."""
+
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"Type room code",
+        text=static.type_room_code_message,
         reply_markup=cancel_entering_the_room_key()
     )
 
@@ -112,19 +112,19 @@ async def enter_the_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             context.user_data["room_code"] = room_code
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text="You are successfully added to the room",
-                reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id,room_code)),
+                text=static.type_room_code_message,
+                reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id,room_code), roles_assigned=db.roles_assigned(room_code)),
             )
             return ConversationHandler.END
         else:
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text="You are already in this room",
+                text=static.user_already_in_room,
                 reply_markup=cancel_entering_the_room_key()
             )
     else:
         await update.message.reply_text(
-            "Room code is not valid",
+            static.wrong_room_code_message,
             reply_markup=cancel_entering_the_room_key()
         )
         return ENTER_THE_ROOM
@@ -145,11 +145,10 @@ def add_to_room(user_id, room_code, context: ContextTypes.DEFAULT_TYPE):
 async def cancel_entering_the_room(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Cancels and ends the conversation."""
-    logger.debug("cancel called")
+    
     await context.bot.send_message(
         chat_id=update,
-        text="Back to menu",
+        text=static.return_to_menu_message,
         reply_markup=main_menu_keyboard(),
     )
     return ConversationHandler.END

@@ -38,7 +38,7 @@ def submit_wishes_key():
     keyboard = [
         [
             InlineKeyboardButton(
-                "Submit",
+                "Подтвердить",
                 callback_data="submit",
             )
         ]
@@ -50,7 +50,7 @@ def cancel_entering_the_room_key():
     keyboard = [
         [
             InlineKeyboardButton(
-                "Cancel",
+                "В меню",
                 callback_data="cancel",
             )
         ]
@@ -58,18 +58,26 @@ def cancel_entering_the_room_key():
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
-def room_menu_keyboard(user_is_admin):
+def room_menu_keyboard(user_is_admin: bool, roles_assigned: bool):
 
     if user_is_admin:
+        if roles_assigned:
+            first_row = [
+                KeyboardButton(static.people_list_option),
+            ]
+        else:
+            first_row = [
+                KeyboardButton(static.assign_roles_option), KeyboardButton(static.people_list_option)
+            ]
         keyboard = [
-            [KeyboardButton(static.assign_roles_option), KeyboardButton(static.people_list_option),],
+            first_row,
             [KeyboardButton(static.delete_room_option), KeyboardButton(static.add_wish_option)],
             [KeyboardButton(static.return_to_menu_option)],
-        ]
+            ]
     else:
         keyboard = [
             [KeyboardButton(static.people_list_option),KeyboardButton(static.add_wish_option)],
-            [KeyboardButton(static.delete_room_option),KeyboardButton(static.return_to_menu_option)],
+            [KeyboardButton("Leave Room"),KeyboardButton(static.return_to_menu_option)],
         ]
 
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)

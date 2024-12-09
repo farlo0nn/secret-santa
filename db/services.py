@@ -168,3 +168,13 @@ def get_gift_assignment(user_id, room_code):
             return DataTransfer(None, valid=False)
         
     
+def roles_assigned(room_code):
+    with db_session() as db:
+        assignments_quantity = db.query(GiftAssignment).filter_by(room_code=room_code).count()
+        return True if assignments_quantity!=0 else False
+    
+def delete_user_from_room(user_id, room_code):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        room = db.query(Room).filter_by(code=room_code).first()
+        room.users.remove(user)

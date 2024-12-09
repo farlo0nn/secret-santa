@@ -13,6 +13,7 @@ from .services import (
     delete_room,
     people_list,
     return_to_menu,
+    leave_room
 )
 from ..validators import room_context_validator
 
@@ -65,3 +66,7 @@ async def delete_room_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def return_to_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await return_to_menu(update.effective_chat.id, context)
+
+@room_context_validator
+async def leave_room_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await leave_room(update.effective_chat.id, context)

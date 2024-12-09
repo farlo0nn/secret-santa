@@ -15,6 +15,7 @@ from .messages.handlers import (
     get_delete_room_handler,
     get_people_list_handler,
     get_return_to_menu_handler,
+    get_leave_room_handler
 )
 
 from .conversations.handlers import (
@@ -33,6 +34,7 @@ def config_application(application: Application) -> None:
     application.add_handler(get_assign_roles_handler())
     application.add_handler(get_people_list_handler())
     application.add_handler(get_delete_room_handler())
+    application.add_handler(get_leave_room_handler())
     application.add_handler(get_return_to_menu_handler())
     # application.add_handler(get_invalid_messages_handler())
     application.add_handler(get_add_wishes_conversation_handler())
@@ -42,7 +44,7 @@ def config_application(application: Application) -> None:
 def run_application() -> None:
     if isinstance(config.TG_TOKEN, str):
 
-        application = ApplicationBuilder().token(config.TG_TOKEN).read_timeout(30).write_timeout(30).build()
+        application = ApplicationBuilder().token(config.TG_TOKEN).read_timeout(15).write_timeout(15).build()
         config_application(application)
 
         application.run_polling()

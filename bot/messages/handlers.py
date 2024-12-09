@@ -9,6 +9,7 @@ from .filters import (
     PeopleListMessageFilter,
     DeleteRoomMessageFilter,
     ReturnToMenuMessageFilter,
+    LeaveRoomFilter
 )
 
 from .callbacks import (
@@ -22,6 +23,7 @@ from .callbacks import (
     people_list_callback,
     delete_room_callback,
     return_to_menu_callback,
+    leave_room_callback
 )
 
 
@@ -54,3 +56,6 @@ def get_delete_room_handler():
 
 def get_return_to_menu_handler():
     return MessageHandler(ReturnToMenuMessageFilter(), callback=return_to_menu_callback)
+
+def get_leave_room_handler():
+    return MessageHandler(LeaveRoomFilter(), callback=leave_room_callback)

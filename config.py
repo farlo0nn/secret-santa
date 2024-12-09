@@ -4,6 +4,8 @@ from static_data import messages as static
 
 load_dotenv(find_dotenv())
 
+
+DB_MANAGER = os.getenv("db_manager")
 DB_NAME = os.getenv("db_name")
 DB_HOST = os.getenv("db_host")
 DB_USER = os.getenv("db_user")

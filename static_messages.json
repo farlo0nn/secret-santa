@@ -1,33 +1,50 @@
 {
     
-    "create_new_room_option": "New Room📝",
-    "enter_the_room_option": "Enter",
-    "my_rooms_option": "My Rooms🚪",
-    "room_info_option": "Room {room_code} ℹ️",
+    "create_new_room_option": "Создать комнату📝",
+    "enter_the_room_option": "Войти🔑",
+    "my_rooms_option": "Мои комнаты🚪",
+    "room_info_option": "Комната {room_code} ℹ️",
     
-    "assign_roles_option": "Assign Santas 🎅🏻",
-    "add_wish_option": "Add Wish",
-    "people_list_option": "Info 👤",
-    "delete_room_option": "Delete Room ❌",
-    "return_to_menu_option": "Return⬅️",
+    "assign_roles_option": "Назначить Санту 🎅🏻",
+    "add_wish_option": "Ваши желания 💫",
+    "people_list_option": "Информация 👤",
+    "delete_room_option": "Удалить комнату ❌",
+    "return_to_menu_option": "Вернуться⬅️",
     
     
     
-    "start_message": "<b>Welcome To Secret Santa Bot!</b> 🎅🎄",
-    "my_rooms_message": "Choose one of your rooms",
-    "invalid_message": "Invalid message, please use navigation panel instead",
-    "new_room_message": "New Room Was Created",
+    "start_message": "<b>Приветствую в игре Секретный Санта!</b> 🎅🎄",
+    "my_rooms_message": "Выбери одну из комнат",
+    "invalid_message": "Используйте навигационную панель",
+    "new_room_message": "Вы создали новую комнату",
     
-    "return_to_menu_message": "You're back to Main Menu",
-    "people_list_message": "🏠 Room {room_code}🏠\n\n<b>🦧 {admin_username}</b>\n\n🐒 <b>Members</b>\n\n➖{usernames_string}",
-    "delete_room_message": "<b>You've successfully deleted room {}</b>",
-    "invalid_room_context_message": "Room is not select\nPlease select it",
-    "give_to_message": "You need to prepare a gift for {receiver_username}\nWe wish you fun on your holiday!",
-    "no_created_rooms_message": "There are no rooms created",
-    "room_doesnt_exist_message": "Room {room_code} doesn't exist",
-    "room_selected_message": "You selected Room {room_code}",
-    "add_to_room_message": "You was successfully added to {username}'s room with code {code}",
-    "roles_already_assigned": "Roles are already assigned"
+    "return_to_menu_message": "Обратно в меню",
+    "people_list_message": "🏠 Комната {room_code}🏠\n\n<b>🦧 {admin_username}</b>\n\n🐒 <b>Участники</b>\n\n➖{usernames_string}",
+    "assignment_message": "\n\nВы должнын подготовить подарок для <b>{receiver}</b>",
+    "roles_are_not_assigned": "\n\nРоли еще не распределены",
     
+    
+    "delete_room_message": "<b>Вы удалили комнату {}</b>",
+    "invalid_room_context_message": "Комната не выбрана",
+    "give_to_message": "Вам нужно подготовить подарок для {receiver_username}\nУдачи и хороших праздников!",
+    "no_created_rooms_message": "Вы не зашли ни в одному комнату",
+    "room_doesnt_exist_message": "Комната с кодом {room_code} не существует",
+    "room_selected_message": "Вы выбрали комнату {room_code}",
+    "add_to_room_message": "Вы зашли в комнату с кодом",
+
+
+    "roles_already_assigned": "Роли уже распределены",
+    "wrong_room_code_message": "Неверный код комнаты",
+    "type_room_code_message": "Введите код комнаты",
+    "user_already_in_room": "Вы уже состоите в этой комнате",
+
+    "wish_already_in_list_message": "Это желание уже в вашем списке\n\nЕсть ли еще какие-то желания?",
+    "wish_added_message": "Желание добавлено",
+    "users_wishes_message": "Ваши желания:\n{wish_list}",
+    "type_wishes_message": "Напишите любое свое желание",
+
+    "leave_only_for_admin_message": "Вы можете выйти из комнаты только, если являетесь ее администратором",
+    "successful_leave": "Вы успешно покинули комнату {room_code}"
+
 
 }

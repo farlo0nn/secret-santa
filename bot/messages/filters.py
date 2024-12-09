@@ -38,3 +38,7 @@ class DeleteRoomMessageFilter(MessageFilter):
 class ReturnToMenuMessageFilter(MessageFilter):
     def filter(self, message):
         return message.text == static.return_to_menu_option
+
+class LeaveRoomFilter(MessageFilter):
+    def filter(self, message):
+        return message.text == "Leave Room"

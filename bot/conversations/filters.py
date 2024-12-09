@@ -10,5 +10,4 @@ class AddWishFilter(MessageFilter):
 
 class EnterTheRoomFilter(MessageFilter):
     def filter(self, message):
-        logger.debug(message.text)
         return message.text == static.enter_the_room_option

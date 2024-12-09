@@ -78,7 +78,7 @@ async def room_choice(user_id, context: ContextTypes.DEFAULT_TYPE):
         static.room_selected_message.format(room_code=room_code),
         user_id,
         context,
-        reply_markup=room_menu_keyboard(user_is_admin),
+        reply_markup=room_menu_keyboard(user_is_admin=user_is_admin, roles_assigned=db.roles_assigned(room_code)),
     )
 
 
@@ -97,11 +97,14 @@ async def assign_roles(user_id, context: ContextTypes.DEFAULT_TYPE):
 
 async def people_list(user_id, context: ContextTypes.DEFAULT_TYPE):
 
+    room_code = context.user_data["room_code"]
+
     await _send_message(
         get_room_info(user_id, context)
         ,
         user_id,
         context,
+        reply_markup=room_menu_keyboard(db.user_is_admin(user_id,room_code),roles_assigned=db.roles_assigned(room_code))
     )
 
 def get_room_info(user_id, context):
@@ -116,12 +119,12 @@ def get_room_info(user_id, context):
             usernames_string="\n".join(usernames),
         )
     if gift_assignment.valid:
-        info_message += f"\n\nYou prepare gift for <b>{gift_assignment.data.receiver_username}</b>"
+        info_message += static.assignment_message.format(receiver=gift_assignment.data.receiver_username)
         wish_list = db.get_user_wish_list(gift_assignment.data.giver_id, room_code)  
         if wish_list != None:
-            info_message += f"\n\nWishes:\n{", ".join(wish_list)}"
+            info_message += static.users_wishes_message(wish_list=", ".join(wish_list))
     else:
-        info_message += f"\n\nRoles are not assigned yet"
+        info_message += static.roles_are_not_assigned
     return info_message
     
 
@@ -144,4 +147,16 @@ async def return_to_menu(user_id, context: ContextTypes.DEFAULT_TYPE):
         user_id,
         context,
         reply_markup=main_menu_keyboard(),
+    )
+
+async def leave_room(user_id, context: ContextTypes.DEFAULT_TYPE):
+    room_code = context.user_data["room_code"]
+    if db.user_is_admin(user_id, room_code):
+        return static.leave_only_for_admin_message
+    db.delete_user_from_room(user_id, room_code)
+    await _send_message(
+        static.successful_leave,
+        user_id,
+        context,
+        reply_markup=main_menu_keyboard()
     )
