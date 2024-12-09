@@ -116,13 +116,14 @@ def get_room_info(user_id, context):
     info_message = static.people_list_message.format(
             room_code=room_code,
             admin_username=admin_username,
-            usernames_string="\n".join(usernames),
+            usernames_string="\n➖".join(usernames),
         )
     if gift_assignment.valid:
         info_message += static.assignment_message.format(receiver=gift_assignment.data.receiver_username)
         wish_list = db.get_user_wish_list(gift_assignment.data.giver_id, room_code)  
         if wish_list != None:
-            info_message += static.users_wishes_message(wish_list=", ".join(wish_list))
+            logger.debug(wish_list)
+            info_message += static.users_wishes_message.format(wish_list=", ".join(wish_list))
     else:
         info_message += static.roles_are_not_assigned
     return info_message

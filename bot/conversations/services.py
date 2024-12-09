@@ -112,7 +112,7 @@ async def enter_the_room(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             context.user_data["room_code"] = room_code
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
-                text=static.type_room_code_message,
+                text=static.add_to_room_message.format(room_code=room_code),
                 reply_markup=room_menu_keyboard(user_is_admin=db.user_is_admin(user_id,room_code), roles_assigned=db.roles_assigned(room_code)),
             )
             return ConversationHandler.END

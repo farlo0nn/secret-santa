@@ -41,4 +41,4 @@ class ReturnToMenuMessageFilter(MessageFilter):
 
 class LeaveRoomFilter(MessageFilter):
     def filter(self, message):
-        return message.text == "Leave Room"
+        return message.text == static.leave_room_option

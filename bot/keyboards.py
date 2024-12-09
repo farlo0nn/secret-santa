@@ -77,7 +77,7 @@ def room_menu_keyboard(user_is_admin: bool, roles_assigned: bool):
     else:
         keyboard = [
             [KeyboardButton(static.people_list_option),KeyboardButton(static.add_wish_option)],
-            [KeyboardButton("Leave Room"),KeyboardButton(static.return_to_menu_option)],
+            [KeyboardButton(static.leave_room_option),KeyboardButton(static.return_to_menu_option)],
         ]
 
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)

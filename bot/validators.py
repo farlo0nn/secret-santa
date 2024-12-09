@@ -1,3 +1,5 @@
+
+from static_data import messages as static
 from telegram import Update
 from telegram.ext._callbackcontext import CallbackContext
 from telegram.ext import ContextTypes
@@ -14,7 +16,7 @@ def room_context_validator(f):
                 return await f(*args, **kwargs)
             except KeyError:
                 await context.bot.send_message(
-                    update.effective_chat.id, text="Room is not selected"
+                    update.effective_chat.id, text=static.room_not_selected
                 )
 
     return wrapper
