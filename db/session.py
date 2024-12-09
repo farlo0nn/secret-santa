@@ -1,13 +1,18 @@
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session, sessionmaker, scoped_session
-from config import DB_PASSWORD, DB_HOST, DB_NAME, DB_USER
+from config import DB_MANAGER, DB_PASSWORD, DB_HOST, DB_NAME, DB_USER, DB_PORT
 from contextlib import contextmanager
 
 
 def get_engine() -> Engine:
+    
+    if DB_MANAGER == "postgres":
+        url = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}\
+        @{DB_HOST}/{DB_NAME}"
+    elif DB_MANAGER == "mysql":
+        url = f"mysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_PORT}"
     engine = create_engine(
-        f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}\
-    @{DB_HOST}/{DB_NAME}"
+        url        
     )
 
     return engine
