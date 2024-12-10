@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Table, ForeignKey, Integer, String
+from sqlalchemy import Column, Table, ForeignKey, Integer, String, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm import DeclarativeBase
 from .session import get_engine
@@ -17,7 +17,7 @@ class User(Base):
     __tablename__ = "User"
 
     pk: Mapped[int] = mapped_column(primary_key=True)
-    id: Mapped[int] = mapped_column(unique=True)
+    id = Column(BigInteger, unique=True)
     
     username = Column(String(255), unique=False, nullable=True)
 

@@ -10,6 +10,7 @@ from loguru import logger
 def create_user(user_id, username):
     with db_session() as db:
         user = db.query(User).filter_by(id=user_id).first()
+        logger.debug(user is None)
         if user is None:
             user = User(id=user_id, username=username)
             db.add(user)

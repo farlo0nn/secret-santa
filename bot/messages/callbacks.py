@@ -28,18 +28,18 @@ async def start_callback(update: Update, context: CallbackContext):
     
     context.user_data["username_enter_expected"] = True 
 
-    username = update.effective_chat.username 
-    
-    if update.effective_chat.first_name is not None:
-        if update.effective_chat.first_name is not None: 
-            username = update.effective_chat.first_name
-            if update.effective_chat.last_name is not None:
-                username += update.effective_chat.last_name
-        else:
-            username = update.effective_chat.effective_name
-    else:
-        username = update.effective_chat.effective_name
 
+    if update.effective_chat.username is None:
+        if update.effective_user.first_name is not None:
+            if update.effective_user.first_name is not None: 
+                username = update.effective_user.first_name
+                if update.effective_user.last_name is not None:
+                    username += update.effective_user.last_name
+            
+        username = "..."
+    else:
+        username = update.effective_user.username
+    logger.debug(f"{username}, {update.effective_chat.id}")
 
     await start(update.effective_chat.id, update.effective_chat.username, context)
 
