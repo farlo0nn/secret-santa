@@ -45,19 +45,23 @@ async def start(user_id, username, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-async def edit_user(user_id, username, context: ContextTypes.DEFAULT_TYPE):
+async def edit_username(user_id, username, context: ContextTypes.DEFAULT_TYPE):
 
     if username != "-":
         db.edit_user(user_id, username)
 
     username = db.get_user_username(user_id)
-    
+
     await _send_message(
         "Вы завершили регистрацию\nЮзернейм - {username}".format(username=username),
         user_id,
         context,
         reply_markup=main_menu_keyboard()
     )
+
+
+async def edit_username_request(user_id, context: ContextTypes.DEFAULT_TYPE):
+    await _send_message(static.enter_username_message, user_id, context)
 
 async def create_room(user_id, context: ContextTypes.DEFAULT_TYPE) -> None:
     db.create_room(admin_id=user_id)

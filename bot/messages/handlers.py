@@ -9,7 +9,8 @@ from .filters import (
     PeopleListMessageFilter,
     DeleteRoomMessageFilter,
     ReturnToMenuMessageFilter,
-    LeaveRoomFilter
+    LeaveRoomFilter,
+    EditUsernameRequestFilter
 )
 
 from .callbacks import (
@@ -24,7 +25,8 @@ from .callbacks import (
     delete_room_callback,
     return_to_menu_callback,
     leave_room_callback,
-    edit_username_callback
+    edit_username_callback,
+    edit_username_request_callback
 )
 
 
@@ -61,5 +63,8 @@ def get_return_to_menu_handler():
 def get_leave_room_handler():
     return MessageHandler(LeaveRoomFilter(), callback=leave_room_callback)
 
-def get_edit_username_callback():
+def get_edit_username_request_handler():
+    return MessageHandler(EditUsernameRequestFilter(), callback=edit_username_request_callback)
+
+def get_edit_username_handler():
     return MessageHandler(filters.TEXT & ~filters.COMMAND, callback=edit_username_callback)

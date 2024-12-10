@@ -14,7 +14,11 @@ def main_menu_keyboard():
             KeyboardButton(static.enter_the_room_option),
             KeyboardButton(static.create_new_room_option),
         ],
-        [KeyboardButton(static.my_rooms_option)],
+        [
+            KeyboardButton(static.my_rooms_option),
+            KeyboardButton(static.edit_username_option)
+        ],
+        
     ]
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
 

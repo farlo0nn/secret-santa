@@ -44,3 +44,8 @@ class ReturnToMenuMessageFilter(MessageFilter):
 class LeaveRoomFilter(MessageFilter):
     def filter(self, message):
         return message.text == static.leave_room_option
+
+
+class EditUsernameRequestFilter(MessageFilter):
+    def filter(self, message): 
+        return message.text == static.edit_username_option

@@ -14,7 +14,8 @@ from .services import (
     people_list,
     return_to_menu,
     leave_room,
-    edit_user
+    edit_username,
+    edit_username_request
 )
 from ..validators import room_context_validator
 
@@ -44,14 +45,12 @@ async def edit_username_callback(update: Update, context: ContextTypes.DEFAULT_T
 
             username = update.message.text
             context.user_data["username_enter_expected"] = False 
-            await edit_user(update.effective_chat.id, username, context)
+            await edit_username(update.effective_chat.id, username, context)
 
 
     except KeyError:
         pass
             
-            
-
 
 async def create_room_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await create_room(update.effective_chat.id, context)
@@ -62,6 +61,10 @@ async def my_rooms_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await my_rooms(update.effective_chat.id, context)
 
 
+async def edit_username_request_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["username_enter_expected"] = True
+    await edit_username_request(update.effective_chat.id, context)
+
 async def room_choice_callback( update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query: CallbackQuery = update.callback_query  
     await query.answer()
@@ -69,6 +72,8 @@ async def room_choice_callback( update: Update, context: ContextTypes.DEFAULT_TY
     context.user_data["room_code"] = room_code
     await query.delete_message()
     await room_choice(update.effective_chat.id, context)
+
+
 
 
 @room_context_validator
