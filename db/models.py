@@ -9,7 +9,7 @@ class Base(DeclarativeBase): ...
 user_room = Table(
     "user_room",
     Base.metadata,
-    Column("user_id", Integer, ForeignKey("User.id")),
+    Column("user_id", BigInteger, ForeignKey("User.id")),
     Column("room_code", String(8), ForeignKey("Room.code")),
 )
 
@@ -46,7 +46,7 @@ class Room(Base):
 
     pk: Mapped[int] = mapped_column(primary_key=True)
     code = Column(String(8), unique=True)
-    admin_id = Column(Integer, ForeignKey("User.id"))
+    admin_id = Column(BigInteger, ForeignKey("User.id"))
     users = relationship("User", secondary=user_room, back_populates="rooms")
     assignments = relationship("GiftAssignment", backref="room", cascade="all,delete")
     wishes = relationship("Wish", backref="room", cascade="all,delete")
@@ -60,8 +60,8 @@ class GiftAssignment(Base):
 
     pk: Mapped[int] = mapped_column(primary_key=True)
 
-    giver_id = Column(Integer, ForeignKey("User.id"))
-    receiver_id = Column(Integer, ForeignKey("User.id"))
+    giver_id = Column(BigInteger, ForeignKey("User.id"))
+    receiver_id = Column(BigInteger, ForeignKey("User.id"))
 
     giver = relationship("User", foreign_keys=[giver_id], back_populates="give_to")
     receiver = relationship(
@@ -76,7 +76,7 @@ class Wish(Base):
 
     pk: Mapped[int] = mapped_column(primary_key=True)
     content = Column(String(255), unique=False)
-    user_id = Column(Integer, ForeignKey("User.id"))
+    user_id = Column(BigInteger, ForeignKey("User.id"))
     room_code = Column(String(8), ForeignKey("Room.code"))
 
 
