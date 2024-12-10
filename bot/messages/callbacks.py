@@ -31,7 +31,12 @@ async def start_callback(update: Update, context: CallbackContext):
     username = update.effective_chat.username 
     
     if update.effective_chat.first_name is not None:
-        username = update.effective_chat.first_name + " " + update.effective_chat.last_name
+        if update.effective_chat.first_name is not None: 
+            username = update.effective_chat.first_name
+            if update.effective_chat.last_name is not None:
+                username += update.effective_chat.last_name
+        else:
+            username = update.effective_chat.effective_name
     else:
         username = update.effective_chat.effective_name
 
