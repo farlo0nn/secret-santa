@@ -31,6 +31,7 @@ def create_room(admin_id):
         room = Room(code=generate_room_code(), admin_id=admin_id)
         room.users.append(user)
         db.add(room)
+        return room.code
 
 
 def generate_room_code():

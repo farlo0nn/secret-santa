@@ -64,7 +64,12 @@ async def edit_username_request(user_id, context: ContextTypes.DEFAULT_TYPE):
     await _send_message(static.enter_username_message, user_id, context)
 
 async def create_room(user_id, context: ContextTypes.DEFAULT_TYPE) -> None:
-    db.create_room(admin_id=user_id)
+    room_code = db.create_room(admin_id=user_id)
+    await context.bot.send_message(
+        chat_id=user_id,
+        text=static.new_room_message.format(room_code),
+        reply_markup=ParseMode.MARKDOWN_V2
+    )
     await _send_message(static.new_room_message, user_id, context)
 
 
