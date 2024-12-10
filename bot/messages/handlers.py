@@ -24,7 +24,7 @@ from .callbacks import (
     delete_room_callback,
     return_to_menu_callback,
     leave_room_callback,
-    username_enter_callback
+    edit_username_callback
 )
 
 
@@ -61,5 +61,5 @@ def get_return_to_menu_handler():
 def get_leave_room_handler():
     return MessageHandler(LeaveRoomFilter(), callback=leave_room_callback)
 
-def get_username_enter_callback():
-    return MessageHandler(filters.TEXT & ~filters.COMMAND, callback=username_enter_callback)
+def get_edit_username_callback():
+    return MessageHandler(filters.TEXT & ~filters.COMMAND, callback=edit_username_callback)

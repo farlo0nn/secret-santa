@@ -14,6 +14,15 @@ def create_user(user_id, username):
             user = User(id=user_id, username=username)
             db.add(user)
 
+def edit_user(user_id, username):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        if user is None:
+            create_user(user_id, username)
+        else:
+            user.username = username 
+        
+
 
 def create_room(admin_id):
     with db_session() as db:

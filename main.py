@@ -3,7 +3,7 @@ from db.models import update_models
 from loguru import logger
 
 if __name__ == "__main__":
-    # update_models()
+    update_models()
     logger.add("log.log", format="{level}|{message}")
     run_application()
 

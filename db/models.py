@@ -19,7 +19,7 @@ class User(Base):
     pk: Mapped[int] = mapped_column(primary_key=True)
     id: Mapped[int] = mapped_column(unique=True)
     
-    username = Column(String(255), unique=False)
+    username = Column(String(255), unique=False, nullable=True)
 
     created_rooms = relationship("Room", backref="admin")
     rooms = relationship("Room", secondary=user_room, back_populates="users")

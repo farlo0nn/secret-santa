@@ -16,7 +16,7 @@ from .messages.handlers import (
     get_people_list_handler,
     get_return_to_menu_handler,
     get_leave_room_handler,
-    get_username_enter_callback
+    get_edit_username_callback
 )
 
 from .conversations.handlers import (
@@ -40,7 +40,7 @@ def config_application(application: Application) -> None:
     # application.add_handler(get_invalid_messages_handler())
     application.add_handler(get_add_wishes_conversation_handler())
     application.add_handler(get_enter_the_room_conversation_handler())
-    application.add_handler(get_username_enter_callback())
+    application.add_handler(get_edit_username_callback())
 
 
 def run_application() -> None:

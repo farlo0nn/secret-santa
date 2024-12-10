@@ -39,14 +39,19 @@ async def send_invalid_message(user_id, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def start(user_id, username, context: ContextTypes.DEFAULT_TYPE):
-    
+    db.create_user(user_id, username)
     await _send_message(
         static.start_message.format(username=username), user_id, context
     )
 
 
-async def create_user(user_id, username, context: ContextTypes.DEFAULT_TYPE):
-    db.create_user(user_id, username)
+async def edit_user(user_id, username, context: ContextTypes.DEFAULT_TYPE):
+
+    if username != "-":
+        db.edit_user(user_id, username)
+
+    username = db.get_user_username(user_id)
+    
     await _send_message(
         "Вы завершили регистрацию\nЮзернейм - {username}".format(username=username),
         user_id,
@@ -80,7 +85,7 @@ async def room_choice(user_id, context: ContextTypes.DEFAULT_TYPE):
         if db.room_exists(room_code):
             pass
         else:
-            return await _send_message(static.room_doesnt_exist_message.format(room_code), user_id, context)
+            return await _send_message(static.room_doesnt_exist_message.format(room_code=room_code), user_id, context)
     user_is_admin = db.user_is_admin(user_id, room_code)
 
     return await _send_message(

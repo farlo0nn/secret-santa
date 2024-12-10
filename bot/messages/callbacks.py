@@ -14,7 +14,7 @@ from .services import (
     people_list,
     return_to_menu,
     leave_room,
-    create_user
+    edit_user
 )
 from ..validators import room_context_validator
 
@@ -27,24 +27,28 @@ async def start_callback(update: Update, context: CallbackContext):
     
     context.user_data["username_enter_expected"] = True 
 
+    username = update.effective_chat.username 
+    
+    if update.effective_chat.first_name is not None:
+        username = update.effective_chat.first_name + " " + update.effective_chat.last_name
+    else:
+        username = update.effective_chat.effective_name
+
+
     await start(update.effective_chat.id, update.effective_chat.username, context)
 
 
-async def username_enter_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def edit_username_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        if context.user_data["username_enter_expected"]:
 
-    if context.user_data["username_enter_expected"]:
-
-        username = update.effective_chat.username 
-        if username is None:
-            if update.effective_chat.first_name is not None:
-                username = update.effective_chat.first_name + " " + update.effective_chat.last_name
-            else:
-                username = update.effective_chat.effective_name
-
-        if update.message.text != "-":
             username = update.message.text
-            
-        await create_user(update.effective_chat.id, username, context)
+            context.user_data["username_enter_expected"] = False 
+            await edit_user(update.effective_chat.id, username, context)
+
+
+    except KeyError:
+        pass
             
             
 
