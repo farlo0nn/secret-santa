@@ -53,7 +53,7 @@ async def edit_username(user_id, username, context: ContextTypes.DEFAULT_TYPE):
     username = db.get_user_username(user_id)
 
     await _send_message(
-        "Вы завершили регистрацию\nЮзернейм - {username}".format(username=username),
+        "Юзернейм - {username}".format(username=username),
         user_id,
         context,
         reply_markup=main_menu_keyboard()
