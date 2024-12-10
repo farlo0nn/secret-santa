@@ -50,7 +50,7 @@ async def edit_username_callback(update: Update, context: ContextTypes.DEFAULT_T
 
             username = update.message.text
             context.user_data["username_enter_expected"] = False 
-            await edit_username(update.effective_chat.id, username, context)
+            await edit_username(update.effective_user.id, username, context)
 
 
     except KeyError:
