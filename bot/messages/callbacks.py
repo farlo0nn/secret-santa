@@ -41,8 +41,8 @@ async def start_callback(update: Update, context: CallbackContext):
         username = update.effective_user.username
     logger.debug(f"{username}, {update.effective_chat.id}")
 
-    # await start(update.effective_chat.id, update.effective_chat.username, context)
-    await start(5277527883, "test", context)
+    await start(update.effective_chat.id, update.effective_chat.username, context)
+    # await start(5277527883, "test", context)
 
 
 async def edit_username_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
