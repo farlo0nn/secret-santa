@@ -1,0 +1,38 @@
+[project]
+name = "telegram-bot"
+version = "0.0.1"
+dependencies = [
+    "alembic>=1.17.2",
+    "anyio==4.6.2.post1",
+    "black==24.10.0",
+    "certifi==2024.8.30",
+    "click==8.1.7",
+    "h11==0.14.0",
+    "httpcore==1.0.6",
+    "httpx==0.27.2",
+    "idna==3.10",
+    "loguru==0.7.2",
+    "mypy-extensions==1.0.0",
+    "mysqlclient==2.2.6",
+    "packaging==24.1",
+    "pathspec==0.12.1",
+    "platformdirs==4.3.6",
+    "psycopg2==2.9.10",
+    "pydantic>=2.11.10",
+    "pydantic-settings>=2.12.0",
+    "python-dotenv==1.0.1",
+    "python-telegram-bot==21.6",
+    "sniffio==1.3.1",
+    "sqlalchemy==2.0.36",
+    "typing-extensions==4.12.2",
+]
+
+[project.scripts]
+bot = "app.main:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app/"]

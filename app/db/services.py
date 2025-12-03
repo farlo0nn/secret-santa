@@ -1,0 +1,233 @@
+import uuid
+import random
+
+from sqlalchemy import text, inspect
+
+from core.models import DataTransfer, GiverReceiverIdsPair, GiverReceiverPair, DbStatus
+from core.logger import logger 
+from .session import db_session, get_engine
+from .models import User, Room, GiftAssignment, Wish, Base
+
+
+
+
+def create_user(user_id, username):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        logger.debug(user is None)
+        if user is None:
+            user = User(id=user_id, username=username)
+            db.add(user)
+
+def edit_user(user_id, username):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        if user is None:
+            create_user(user_id, username)
+        else:
+            user.username = username 
+        
+
+
+def create_room(admin_id):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=admin_id).first()
+        room = Room(code=generate_room_code(), admin_id=admin_id)
+        room.users.append(user)
+        db.add(room)
+        return room.code
+
+
+def generate_room_code():
+    room_code = uuid.uuid4().hex[:8]
+    return room_code
+
+
+def add_to_room(user_id, code):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        room = db.query(Room).filter_by(code=code).first()
+        if room not in user.rooms:
+            user.rooms.append(room)
+        logger.debug(user.rooms)
+        return user.username
+
+
+def get_my_room_codes(user_id):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        return [room.code for room in user.rooms]
+
+
+def is_valid_room_code(string):
+    with db_session() as db:
+        room = db.query(Room).filter_by(code=string).first()
+        if room is None:
+            return False
+        return True
+
+
+def get_room_people_list(room_code):
+    with db_session() as db:
+        if not is_valid_room_code(room_code):
+            return None
+        room = db.query(Room).filter_by(code=room_code).first()
+        return [user.username for user in room.users]
+
+
+def get_room_admin(room_code):
+    with db_session() as db:
+        if not is_valid_room_code(room_code):
+            return None
+        room = db.query(Room).filter_by(code=room_code).first()
+        return room.admin.username
+
+
+def assign_roles(room_code):
+    with db_session() as db:
+        room = db.query(Room).filter_by(code=room_code).first()
+
+        assignment_for_room_exists = bool(
+            db.query(GiftAssignment).filter_by(room_code=room.code).count()
+        )
+        if assignment_for_room_exists:
+            return DataTransfer(valid=False)
+
+        participants: list[User] = room.users
+
+        givers = participants[:]
+
+        random.shuffle(givers)
+        receivers = givers[1:] + givers[:1]
+
+        assignments = []
+
+        for giver, receiver in zip(givers, receivers):
+            assignment = GiftAssignment(
+                giver_id=giver.id, receiver_id=receiver.id, room_code=room.code
+            )
+            assignments.append(assignment)
+
+        db.add_all(assignments)
+        # user = db.query(User).filter_by(pk=assignment.giver_pk).first()
+        assignments = db.query(GiftAssignment).filter_by(room_code=room.code).all()
+        giver_receiver_pairs = [
+            GiverReceiverIdsPair(assignment.giver.id, assignment.receiver.id)
+            for assignment in assignments
+        ]
+        return DataTransfer(giver_receiver_pairs, True)
+
+
+def get_user_username(user_id):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        if user is not None:
+            return user.username
+        return None
+
+
+def delete_room(room_code):
+    with db_session() as db:
+        room = db.query(Room).filter_by(code=room_code).first()
+        db.delete(room)
+
+
+def room_exists(room_code):
+    with db_session() as db:
+        room = db.query(Room).filter_by(code=room_code).first()
+        return True if room else False
+
+
+def add_wish_list(user_id, room_code, wish_list):
+    with db_session() as db:
+        wish_object_list = [
+            Wish(content=wish, user_id=user_id, room_code=room_code) for wish in wish_list
+        ]
+        db.add_all(wish_object_list)
+
+
+def get_user_wish_list(user_id, room_code):
+    with db_session() as db:
+        user: User = db.query(User).filter_by(id=user_id).first()
+        wish_list = [
+            wish.content
+            for wish in list(filter(lambda wish: wish.room_code == room_code, user.wishes))
+        ]
+        return wish_list or None
+
+
+def room_exists(room_code):
+    with db_session() as db:
+        room: Room = db.query(Room).filter_by(code=room_code).first()
+        return True if room else False
+
+
+def room_members_id(room_code):
+    with db_session() as db:
+        room: Room = db.query(Room).filter_by(code=room_code).first()
+        return [user.id for user in room.users]
+
+
+def user_is_admin(user_id, room_code):
+    with db_session() as db:
+        user: User = db.query(User).filter_by(id=user_id).first()
+        return room_code in [room.code for room in user.created_rooms]
+
+
+def get_gift_assignment(user_id, room_code):
+    with db_session() as db:
+        assignment = db.query(GiftAssignment).filter_by(room_code=room_code).filter_by(giver_id=user_id).first()
+        if assignment is not None: 
+            return DataTransfer(GiverReceiverPair(assignment.giver.username, assignment.giver.id, assignment.receiver.username, assignment.receiver.id),True)
+        else: 
+            return DataTransfer(None, valid=False)
+        
+    
+def roles_assigned(room_code):
+    with db_session() as db:
+        assignments_quantity = db.query(GiftAssignment).filter_by(room_code=room_code).count()
+        return True if assignments_quantity!=0 else False
+    
+def delete_user_from_room(user_id, room_code):
+    with db_session() as db:
+        user = db.query(User).filter_by(id=user_id).first()
+        room = db.query(Room).filter_by(code=room_code).first()
+        room.users.remove(user)
+
+
+def check_db_status() -> DbStatus:
+    
+    engine = get_engine()
+    status = DbStatus()
+        
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+            status.connection = True
+
+        inspector = inspect(engine)
+        existing_tables = inspector.get_table_names()
+        
+        model_tables = Base.metadata.tables.keys()
+        missing = [t for t in model_tables if t not in existing_tables]
+        logger.info(missing)
+        logger.info(model_tables)
+        
+        if not missing:
+            status.models_synced = True
+        else:
+            status.missing_tables = missing
+            status.error = f"Database missing tables: {missing}"
+            logger.exception(f"Database missing tables: {missing}")
+
+    except Exception as e:
+        status.error = str(e)
+        logger.error(f"Database health check failed: {e}")
+    finally:
+        engine.dispose()
+
+    return status
+
+def update_models():
+    engine = get_engine()
+    Base.metadata.create_all(bind=engine)

@@ -1,0 +1,20 @@
+# Ignore the local virtual environment (CRITICAL)
+.venv
+venv
+ENV
+
+# Ignore cache files
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.cache
+
+# Ignore git history
+.git
+.gitignore
+
+# Ignore docker files
+docker-compose.yml
+Dockerfile
+.dockerignore
