@@ -1,6 +1,10 @@
 services:
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: docker/app/Dockerfile
+      args: 
+        - UV_VERSION-${uv_VERSION}
     depends_on:
       db:
         condition: service_healthy
@@ -8,12 +12,23 @@ services:
       - DB_HOST=db
       
   db:
-    image: postgres:15-alpine  
+    platform: linux/amd64
+    build: 
+      context: .
+      dockerfile: docker/db/Dockerfile
+      args: 
+        - PG_TAG-${POSTGRES_IMAGE_TAG}
     restart: always            
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+      WALG_S3_PREFIX: s3://${AWS_BACKUP_BUCKET_NAME}/secret-santa
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      WALG_COMPRESSION_METHOD: lz4
+      WALG_UPLOAD_CONCURRENCY: 2
     volumes:
       - db_data:/var/lib/postgresql/data 
     healthcheck:
@@ -21,6 +36,36 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    command: >
+      postgres 
+      -c archive_mode=on 
+      -c archive_command='wal-g wal-push %p' 
+      -c archive_timeout=60
+      -c wal_level=replica
+
+  backup-scheduler:
+    image: alpine:latest
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: docker/db/Dockerfile
+    environment:
+      WALG_S3_PREFIX: s3://{AWS_BACKUP_BUCKET_NAME}/my-project
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      PGHOST: db
+      PGUSER: ${DB_USER}
+      PGPASSWORD: ${DB_PASSWORD}
+    entrypoint: |
+      /bin/sh -c "
+      echo 'Starting backup scheduler...'
+      while true; do
+        echo 'Run backup...'
+        wal-g backup-push /var/lib/postgresql/data
+        sleep 86400
+      done
+      "
 
 volumes:
   db_data:

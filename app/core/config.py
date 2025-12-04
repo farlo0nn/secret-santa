@@ -29,7 +29,11 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10     # Burst connections
     DB_POOL_RECYCLE: int = 3600   # Recycle connections every hour
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    model_config = SettingsConfigDict(
+        env_file=".env", 
+        case_sensitive=True,
+        extra="ignore"
+    )
 
     @computed_field(return_type=str)
     @property
