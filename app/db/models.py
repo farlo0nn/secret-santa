@@ -6,12 +6,12 @@ class Base(DeclarativeBase): ...
 user_room = Table(
     "user_room",
     Base.metadata,
-    Column("user_id", BigInteger, ForeignKey("User.id")),
-    Column("room_code", String(8), ForeignKey("Room.code")),
+    Column("user_id", BigInteger, ForeignKey("users.id")), 
+    Column("room_code", String(8), ForeignKey("rooms.code")),
 )
 
 class User(Base):
-    __tablename__ = "User"
+    __tablename__ = "users"
 
     pk: Mapped[int] = mapped_column(primary_key=True)
     id = Column(BigInteger, unique=True)
@@ -39,11 +39,13 @@ class User(Base):
 
 
 class Room(Base):
-    __tablename__ = "Room"
+    __tablename__ = "rooms" 
 
     pk: Mapped[int] = mapped_column(primary_key=True)
     code = Column(String(8), unique=True)
-    admin_id = Column(BigInteger, ForeignKey("User.id"))
+    
+    admin_id = Column(BigInteger, ForeignKey("users.id")) 
+    
     users = relationship("User", secondary=user_room, back_populates="rooms")
     assignments = relationship("GiftAssignment", backref="room", cascade="all,delete")
     wishes = relationship("Wish", backref="room", cascade="all,delete")
@@ -53,25 +55,26 @@ class Room(Base):
     
 
 class GiftAssignment(Base):
-    __tablename__ = "GiftAssignment"
+    __tablename__ = "gift_assignments" 
 
     pk: Mapped[int] = mapped_column(primary_key=True)
 
-    giver_id = Column(BigInteger, ForeignKey("User.id"))
-    receiver_id = Column(BigInteger, ForeignKey("User.id"))
+    giver_id = Column(BigInteger, ForeignKey("users.id"))
+    receiver_id = Column(BigInteger, ForeignKey("users.id"))
 
     giver = relationship("User", foreign_keys=[giver_id], back_populates="give_to")
     receiver = relationship(
         "User", foreign_keys=[receiver_id], back_populates="receive_from"
     )
 
-    room_code = Column(String(8), ForeignKey("Room.code"))
+    room_code = Column(String(8), ForeignKey("rooms.code"))
 
 
 class Wish(Base):
-    __tablename__ = "Wish"
+    __tablename__ = "wishes"  
 
     pk: Mapped[int] = mapped_column(primary_key=True)
     content = Column(String(255), unique=False)
-    user_id = Column(BigInteger, ForeignKey("User.id"))
-    room_code = Column(String(8), ForeignKey("Room.code"))
+    
+    user_id = Column(BigInteger, ForeignKey("users.id"))
+    room_code = Column(String(8), ForeignKey("rooms.code"))

@@ -2,6 +2,7 @@ import db.services as db
 
 
 from core.static_data import messages as static
+from core.models import Status
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 from ..keyboards import main_menu_keyboard, my_rooms_inline_keyboard, room_menu_keyboard
@@ -109,14 +110,14 @@ async def room_choice(user_id, context: ContextTypes.DEFAULT_TYPE):
 
 async def assign_roles(user_id, context: ContextTypes.DEFAULT_TYPE):
     response = db.assign_roles(context.user_data["room_code"])
-
-    if response.valid:
+    logger.info(response)
+    if response.status == Status.CREATED:
         for giver_receiver_pair in response.data:
             await send_roles(
                 giver_chat_id=giver_receiver_pair.giver_chat_id,
                 context=context,
             )
-    else:
+    elif response.status == Status.EXISTS:
         await _send_message(static.roles_already_assigned, user_id, context)
 
 
@@ -133,24 +134,27 @@ async def people_list(user_id, context: ContextTypes.DEFAULT_TYPE):
     )
 
 def get_room_info(user_id, context):
-
     room_code = context.user_data["room_code"]
-    usernames = db.get_room_people_list(room_code)
-    admin_username = db.get_room_admin(room_code)
-    gift_assignment = db.get_gift_assignment(user_id, room_code)
+
+    info = db.get_full_room_context(user_id, room_code)
+    
+    if not info:
+        return static.room_doesnt_exist_message
+
     info_message = static.people_list_message.format(
-            room_code=room_code,
-            admin_username=admin_username,
-            usernames_string="\n➖".join(usernames),
-        )
-    if gift_assignment.valid:
-        info_message += static.assignment_message.format(receiver=gift_assignment.data.receiver_username)
-        wish_list = db.get_user_wish_list(gift_assignment.data.receiver_id, room_code)  
-        if wish_list != None:
-            logger.debug(wish_list)
-            info_message += static.users_wishes_message.format(wish_list=", ".join(wish_list))
+            room_code=info.room_code,
+            admin_username=info.admin_username,
+            usernames_string="\n➖".join(info.usernames),
+    )
+
+    if info.receiver_name:
+        info_message += static.assignment_message.format(receiver=info.receiver_name)
+        
+        if info.receiver_wishes:
+            info_message += static.users_wishes_message.format(wish_list=", ".join(info.receiver_wishes))
     else:
         info_message += static.roles_are_not_assigned
+        
     return info_message
     
 

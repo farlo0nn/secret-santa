@@ -1,13 +1,22 @@
 from dataclasses import dataclass, field
 from typing import Any, List 
+from enum import Enum
 
 
+class Status(Enum):
+    CREATED = "created"
+    EXISTS = "exists"
+    INVALID = "invalid"
+
+@dataclass
 class DataTransfer:
 
-    def __init__(self, data: Any = None, valid: bool = True) -> None:
-        self.valid = valid
+    def __init__(self, data: Any = None, status: Status = True) -> None:
+        self.status = status
         self.data = data
 
+    def __str__(self):
+        return f"{self.status.value}:{self.data}"
 
 @dataclass
 class GiverReceiverIdsPair:

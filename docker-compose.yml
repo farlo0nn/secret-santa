@@ -1,71 +1,187 @@
+version: "3.8"
+
+networks:
+  backend:
+    driver: overlay
+  internal:
+    driver: overlay
+    attachable: false
+
+volumes:
+  db_data:
+
+secrets:
+  db-password:
+    external: true
+  aws-access-key-id:
+    external: true
+  aws-secret-access-key:
+    external: true
+  tg-token:
+    external: true
+
 services:
-  app:
-    build: 
-      context: .
-      dockerfile: docker/app/Dockerfile
-      args: 
-        - UV_VERSION-${uv_VERSION}
+  migrations:
+    image: farlo0nn/secret-santa:v7
+    networks:
+      - backend
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+    secrets:
+      - source: db-password
+        target: DB_PASSWORD
+      - source: tg-token
+        target: TG_TOKEN
     environment:
-      - DB_HOST=db
-      
+      DB_HOST: db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PORT: ${DB_PORT}
+    command: >
+      /bin/sh -c "
+        echo 'Running migrations...' &&
+        export DB_PASSWORD=$$(cat /run/secrets/DB_PASSWORD) &&
+        uv run alembic upgrade head &&
+        echo 'Migrations complete.'
+      "
+    deploy:
+      restart_policy:
+        condition: none
+      placement:
+        constraints:
+          - node.role == manager
+
+  app:
+    image: farlo0nn/secret-santa:v7
+    networks:
+      - backend
+    depends_on:
+      - db
+      - migrations
+    secrets:
+      - source: tg-token
+        target: TG_TOKEN
+      - source: db-password
+        target: DB_PASSWORD
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PORT: ${DB_PORT}
+    command: >
+      /bin/sh -c "
+        export DB_PASSWORD=$$(cat /run/secrets/DB_PASSWORD) &&
+        uv run bot
+      "
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        parallelism: 1
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
   db:
-    platform: linux/amd64
-    build: 
-      context: .
-      dockerfile: docker/db/Dockerfile
-      args: 
-        - PG_TAG-${POSTGRES_IMAGE_TAG}
-    restart: always            
+    image: farlo0nn/secret-santa-db:latest
+    networks:
+      - backend
+      - internal
+    secrets:
+      - db-password
+      - aws-access-key-id
+      - aws-secret-access-key
     environment:
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db-password
       POSTGRES_DB: ${DB_NAME}
       WALG_S3_PREFIX: s3://${AWS_BACKUP_BUCKET_NAME}/secret-santa
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION}
       WALG_COMPRESSION_METHOD: lz4
       WALG_UPLOAD_CONCURRENCY: 2
     volumes:
-      - db_data:/var/lib/postgresql/data 
+      - db_data:/var/lib/postgresql/data
+    command: >
+      postgres
+        -c wal_level=replica
+        -c archive_mode=on
+        -c archive_timeout=60
+        -c archive_command='wal-g wal-push %p'
+        -c restore_command='wal-g wal-fetch %f %p'
+    deploy:
+      placement:
+        constraints:
+          - node.labels.db == true
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 3G
+        reservations:
+          cpus: "1.0"
+          memory: 1G
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    command: >
-      postgres 
-      -c archive_mode=on 
-      -c archive_command='wal-g wal-push %p' 
-      -c archive_timeout=60
-      -c wal_level=replica
 
   backup-scheduler:
-    image: alpine:latest
+    image: farlo0nn/secret-santa-db-backup:latest
+    networks:
+      - internal
     depends_on:
       - db
-    build:
-      context: .
-      dockerfile: docker/db/Dockerfile
+    volumes:
+      - db_data:/var/lib/postgresql/data:ro
+    secrets:
+      - db-password
+      - aws-access-key-id
+      - aws-secret-access-key
     environment:
-      WALG_S3_PREFIX: s3://{AWS_BACKUP_BUCKET_NAME}/my-project
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      PGHOST: db
-      PGUSER: ${DB_USER}
-      PGPASSWORD: ${DB_PASSWORD}
-    entrypoint: |
+      WALG_S3_PREFIX: s3://${AWS_BACKUP_BUCKET_NAME}/secret-santa
+      AWS_REGION: ${AWS_REGION}
+    entrypoint: >
       /bin/sh -c "
-      echo 'Starting backup scheduler...'
-      while true; do
-        echo 'Run backup...'
-        wal-g backup-push /var/lib/postgresql/data
-        sleep 86400
-      done
+        export AWS_ACCESS_KEY_ID=$$(cat /run/secrets/aws-access-key-id) &&
+        export AWS_SECRET_ACCESS_KEY=$$(cat /run/secrets/aws-secret-access-key) &&
+        export PGPASSWORD=$$(cat /run/secrets/db-password) &&
+        echo 'Backup scheduler started.' &&
+        sleep 60 &&
+        while true; do
+          echo 'Starting backup...' &&
+          wal-g backup-push /var/lib/postgresql/data &&
+          echo 'Backup complete.' &&
+          sleep 86400;
+        done
       "
-
-volumes:
-  db_data:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      placement:
+        constraints:
+          - node.labels.db == true
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M

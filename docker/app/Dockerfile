@@ -1,38 +1,32 @@
 ARG UV_VERSION=0.9.15
-FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv_cli
+FROM --platform=linux/amd64 ghcr.io/astral-sh/uv:${UV_VERSION} AS uv_cli
+FROM --platform=linux/amd64 python:3.12-slim-bookworm
 
-# ARG PYTHON_VERSION=3.12-slim-trixie
-# FROM python:${PYTHON_VERSION}
-FROM python:3.12-slim-trixie
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential pkg-config default-libmysqlclient-dev libpq-dev \
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+    build-essential pkg-config default-libmysqlclient-dev libpq-dev postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=uv_cli /uv /uvx /bin/
 
-# 3. FIX: Create the user (This was missing!)
 RUN groupadd -r appuser && useradd -r -g appuser appuser
-
 WORKDIR /app
 
-# 4. ENV setup
 ENV PYTHONPATH="${PYTHONPATH}:/app/app"
 ENV UV_CACHE_DIR=/app/.cache/uv
+ENV PATH="/app/.venv/bin:$PATH"
 
-# 5. FIX: Optimized Caching & Permissions
-# First, copy ONLY dependency files
 COPY pyproject.toml uv.lock ./
 
-# Give ownership to appuser BEFORE syncing
 RUN mkdir -p /app/.cache/uv && chown -R appuser:appuser /app
-
 USER appuser
 
-COPY --chown=appuser:appuser . /app
+
+RUN uv sync --locked --no-install-project --no-dev
+
+COPY --chown=appuser:appuser app /app/app
+COPY --chown=appuser:appuser alembic /app/alembic
+COPY --chown=appuser:appuser alembic.ini /app/alembic.ini
+COPY --chown=appuser:appuser static_messages.json /app/static_messages.json
 
 RUN uv sync --locked --no-dev
-COPY --chown=appuser:appuser docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
-ENTRYPOINT ["/docker-entrypoint.sh"]

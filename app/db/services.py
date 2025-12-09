@@ -3,13 +3,51 @@ import random
 
 from sqlalchemy import text, inspect
 
-from core.models import DataTransfer, GiverReceiverIdsPair, GiverReceiverPair, DbStatus
+from core.models import DataTransfer, GiverReceiverIdsPair, GiverReceiverPair, DbStatus, Status
 from core.logger import logger 
 from .session import db_session, get_engine
 from .models import User, Room, GiftAssignment, Wish, Base
 
 
+class RoomInfoDTO:
+    def __init__(self, room_code, admin_username, usernames, receiver_name=None, receiver_wishes=None):
+        self.room_code = room_code
+        self.admin_username = admin_username
+        self.usernames = usernames
+        self.receiver_name = receiver_name
+        self.receiver_wishes = receiver_wishes
 
+def get_full_room_context(user_id, room_code):
+    """
+    Fetches EVERYTHING needed for the message in one single DB session.
+    """
+    with db_session() as db:
+        room = db.query(Room).filter_by(code=room_code).first()
+        if not room:
+            return None
+            
+        admin_username = room.admin.username
+        usernames = [u.username for u in room.users]
+        
+        assignment = db.query(GiftAssignment).filter_by(room_code=room_code, giver_id=user_id).first()
+        
+        receiver_name = None
+        receiver_wishes = None
+        
+        if assignment:
+            receiver = assignment.receiver 
+            receiver_name = receiver.username
+            
+            wishes = db.query(Wish).filter_by(user_id=receiver.id, room_code=room_code).all()
+            receiver_wishes = [w.content for w in wishes]
+
+        return RoomInfoDTO(
+            room_code=room_code,
+            admin_username=admin_username,
+            usernames=usernames,
+            receiver_name=receiver_name,
+            receiver_wishes=receiver_wishes
+        )
 
 def create_user(user_id, username):
     with db_session() as db:
@@ -82,40 +120,62 @@ def get_room_admin(room_code):
         room = db.query(Room).filter_by(code=room_code).first()
         return room.admin.username
 
-
-def assign_roles(room_code):
+def assign_roles(room_code: str) -> DataTransfer:
     with db_session() as db:
         room = db.query(Room).filter_by(code=room_code).first()
-
-        assignment_for_room_exists = bool(
-            db.query(GiftAssignment).filter_by(room_code=room.code).count()
-        )
-        if assignment_for_room_exists:
-            return DataTransfer(valid=False)
+        if not room:
+            return DataTransfer(status=Status.INVALID)
 
         participants: list[User] = room.users
+        count = len(participants)
 
+        if count == 0:
+            return DataTransfer(status=Status.INVALID)
+
+
+        existing = db.query(GiftAssignment).filter_by(room_code=room.code).all()
+        if existing:
+            return DataTransfer(status=Status.EXISTS)
+
+
+        # Single user -> auto-pair
+        if count == 1:
+            user = participants[0]
+            assignment = GiftAssignment(
+                giver_id=user.id,
+                receiver_id=user.id, 
+                room_code=room.code
+            )
+            db.add(assignment)
+            db.flush()
+            pair = [GiverReceiverIdsPair(user.id, user.id)]
+            return DataTransfer(pair, status=Status.CREATED)
+        
+        # Create new assignments
         givers = participants[:]
-
         random.shuffle(givers)
         receivers = givers[1:] + givers[:1]
 
-        assignments = []
-
-        for giver, receiver in zip(givers, receivers):
-            assignment = GiftAssignment(
-                giver_id=giver.id, receiver_id=receiver.id, room_code=room.code
+        assignments = [
+            GiftAssignment(
+                giver_id=g.id,
+                receiver_id=r.id,
+                room_code=room.code
             )
-            assignments.append(assignment)
-
-        db.add_all(assignments)
-        # user = db.query(User).filter_by(pk=assignment.giver_pk).first()
-        assignments = db.query(GiftAssignment).filter_by(room_code=room.code).all()
-        giver_receiver_pairs = [
-            GiverReceiverIdsPair(assignment.giver.id, assignment.receiver.id)
-            for assignment in assignments
+            for g, r in zip(givers, receivers)
         ]
-        return DataTransfer(giver_receiver_pairs, True)
+        db.add_all(assignments)
+        db.flush()
+
+    
+        pairs = [GiverReceiverIdsPair(a.giver_id, a.receiver_id) for a in assignments]
+
+        
+
+
+        return DataTransfer(status=Status.CREATED, data=pairs)
+
+
 
 
 def get_user_username(user_id):

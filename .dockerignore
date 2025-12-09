@@ -10,6 +10,7 @@ __pycache__
 .mypy_cache
 .cache
 
+
 # Ignore git history
 .git
 .gitignore
@@ -17,4 +18,10 @@ __pycache__
 # Ignore docker files
 docker-compose.yml
 Dockerfile
+docker
 .dockerignore
+
+.env
+.env.*
+.env.prod
+.env.dev

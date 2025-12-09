@@ -1,15 +1,8 @@
-import os
 from typing import List 
-from dotenv import load_dotenv, find_dotenv
-from core.static_data import messages as static
+from .static_data import messages as static
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import computed_field
-from pathlib import Path 
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-ENV_FILE_PATH = BASE_DIR / ".env"
-
-
+from .logger import logger 
 
 class Settings(BaseSettings):
     # App Settings
@@ -29,11 +22,6 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10     # Burst connections
     DB_POOL_RECYCLE: int = 3600   # Recycle connections every hour
 
-    model_config = SettingsConfigDict(
-        env_file=".env", 
-        case_sensitive=True,
-        extra="ignore"
-    )
 
     @computed_field(return_type=str)
     @property
@@ -44,5 +32,12 @@ class Settings(BaseSettings):
             case _:
                 return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
+    model_config = SettingsConfigDict(
+        secrets_dir="/run/secrets",
+        env_file=".env", 
+        case_sensitive=True,
+        extra="ignore"
+    )
 
+    
 settings = Settings()
